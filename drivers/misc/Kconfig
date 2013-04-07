@@ -677,4 +677,11 @@ config BLX
 	help
 	  Say Y here to enable Battery Life eXtender
 
+config PHANTOM_KP_FILTER
+	depends on MACH_ARIESVE
+	bool "Phantom key presses filter"
+	default y
+	help
+	  Allow to filter and prevent the possbile phantom key presses caused
+	  by radio hardware interference
 endif # MISC_DEVICES
