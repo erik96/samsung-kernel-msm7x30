@@ -3482,7 +3482,7 @@ static int oliver_tsp_ldo_on(void)
 		return rc;
 	}
 
-	rc = regulator_set_voltage(vreg_ldo10, 3000000,3000000);
+	rc = regulator_set_voltage(vreg_ldo10, 2850000,2850000);
 	if (rc) {
 		pr_err("%s: vreg LDO10 set level failed (%d)\n",
 		       __func__, rc);
