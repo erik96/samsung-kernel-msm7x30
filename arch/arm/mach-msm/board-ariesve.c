@@ -1848,7 +1848,7 @@ void msm_snddev_poweramp_off_tty(void)
 }
 
 static struct regulator_bulk_data snddev_regs[] = {
-	{ .supply = "gp4", .min_uV = 1800000, .max_uV = 2600000 },
+	{ .supply = "gp4", .min_uV = 1700000, .max_uV = 2600000 },
 	{ .supply = "ncp", .min_uV = 1800000, .max_uV = 1800000 },
 };
 
@@ -3418,8 +3418,8 @@ static struct i2c_board_info touchkey_info[] __initdata = {
 #endif
 
 static struct regulator_bulk_data oliver_tsp_regs[] = {
-	{ .supply = "gp4", .min_uV = 1800000, .max_uV = 1800000 },
-	{ .supply = "xo_out", .min_uV = 3000000, .max_uV = 3000000 },
+	{ .supply = "gp4", .min_uV = 1700000, .max_uV = 1700000 },
+	{ .supply = "xo_out", .min_uV = 2800000, .max_uV = 2800000 },
 };
 
 static int oliver_tsp_ldo_on(void)
@@ -3497,7 +3497,7 @@ static struct msm_gpio optnav_config_data[] = {
 
 static struct regulator_bulk_data optnav_regulators[] = {
 	{ .supply = "gp7", .min_uV = 1800000, .max_uV = 1800000 },
-	{ .supply = "gp4", .min_uV = 1800000, .max_uV = 2600000 },
+	{ .supply = "gp4", .min_uV = 1700000, .max_uV = 2600000 },
 	{ .supply = "gp9", .min_uV = 1800000, .max_uV = 1800000 },
 	{ .supply = "usb", .min_uV = 3300000, .max_uV = 3300000 },
 };
@@ -5753,7 +5753,7 @@ static int mbp_init_regs(struct device *dev)
 {
 	struct regulator_bulk_data regs[] = {
 		/* Analog and I/O regs */
-		{ .supply = "gp4",  .min_uV = 1800000, .max_uV = 2600000 },
+		{ .supply = "gp4",  .min_uV = 1700000, .max_uV = 2600000 },
 		{ .supply = "s3",   .min_uV = 1800000, .max_uV = 1800000 },
 		/* RF regs */
 		{ .supply = "s2",   .min_uV = 1300000, .max_uV = 1300000 },
