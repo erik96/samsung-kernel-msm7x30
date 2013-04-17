@@ -31,7 +31,7 @@
 
 /* Default filtering parameter values for HOME key */
 #define DEFAULT_HOME_ENABLED				false
-#define DEFAULT_HOME_ALLOWED_IRQS	 		2
+#define DEFAULT_HOME_ALLOWED_IRQS	 		4
 #define DEFAULT_HOME_REPORT_WAIT			12
 
 /* Min and max range constraint for sysfs editable values */
