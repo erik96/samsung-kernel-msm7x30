@@ -116,7 +116,7 @@ static struct wake_lock vbus_wake_lock;
 #define ONCRPC_CHG_GET_GENERAL_STATUS_PROC 	12
 #define ONCRPC_CHARGER_API_VERSIONS_PROC 	0xffffffff
 
-#define BATT_RPC_TIMEOUT    5000	/* 5 sec */
+#define BATT_RPC_TIMEOUT     20000    //5000	/* 5 sec */
 
 #define INVALID_BATT_HANDLE    -1
 
@@ -197,7 +197,7 @@ const int temp_table[][2] =  {
 #define BATT_TEMP_LOW_BLOCK			1708	// 	-3`C   +- 2
 #define BATT_TEMP_LOW_RECOVER		1670	//	0`C    +- 2
  
-#define BATT_FULL_CHARGING_VOLTAGE	4170
+#define BATT_FULL_CHARGING_VOLTAGE	4160
 #define BATT_FULL_CHARGING_CURRENT	180
 
 #define BATT_RECHARGING_VOLTAGE_1	4140
@@ -441,7 +441,7 @@ static char *msm_power_supplied_to[] = {
 	"battery",
 };
 
-#define BATT_CHECK_INTERVAL	(5 * TIME_UNIT_SECOND) // every 5 sec
+#define BATT_CHECK_INTERVAL	(20 * TIME_UNIT_SECOND) //(5 * TIME_UNIT_SECOND) // every 5 sec
 
 static unsigned int charging_start_time = 0;
 
@@ -1137,6 +1137,31 @@ static int msm_batt_check_recharging(void)
 
 static int msm_batt_check_level(int battery_level)
 {
+	/*
+	if (msm_batt_info.batt_full_check)
+	{
+		battery_level = 100;
+	}
+	*/
+	if ( (msm_batt_info.batt_full_check == 0) && (battery_level == 100) )
+	{
+		battery_level = 100;    //99;	// not yet fully charged
+	}
+/*
+	else if ( (battery_level == 0)
+#ifdef MAX17043_FUEL_GAUGE
+		&& (is_alert == 0)
+#endif
+		)
+	{
+		battery_level = 1;	// not yet alerted low battery (do not power off yet)
+	}
+
+	if (msm_batt_info.battery_voltage< msm_batt_info.voltage_min_design)
+	{
+		battery_level = 0;
+	}
+*/
 	if (msm_batt_info.batt_capacity != battery_level)
 	{
 		pr_info("[BATT] %s: Battery level changed ! (%d -> %d)\n", __func__, msm_batt_info.batt_capacity, battery_level);
