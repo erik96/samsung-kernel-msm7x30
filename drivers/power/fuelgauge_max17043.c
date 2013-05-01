@@ -165,7 +165,8 @@ unsigned int fg_read_soc(void)
 	// hsil for get Adjusted SOC%
 	if(FGPureSOC >= 0)
 #ifdef CONFIG_MACH_ARIESVE
-		FGAdjustSOC = ((FGPureSOC*10000)-40)/9730;
+		//FGAdjustSOC = ((FGPureSOC*10000)-40)/9730;
+		FGAdjustSOC = ((FGPureSOC*10000)-0)/9670;
 #else
 		FGAdjustSOC = ((FGPureSOC*10000)-0)/9670;
 #endif
@@ -176,7 +177,8 @@ unsigned int fg_read_soc(void)
 	FGSOC=FGAdjustSOC/100;
 
 #ifdef CONFIG_MACH_ARIESVE
-	if(FGAdjustSOC%100 >= 50)
+	//if(FGAdjustSOC%100 >= 50)
+	if(FGAdjustSOC%100 >= 50 && FGSOC > 1)
 #else
 	if(FGAdjustSOC%100 >= 50 && FGSOC > 1)
 #endif
