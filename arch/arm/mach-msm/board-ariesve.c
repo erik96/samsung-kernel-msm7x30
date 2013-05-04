@@ -143,7 +143,25 @@ EXPORT_SYMBOL(sec_class);
 struct device *switch_dev;
 EXPORT_SYMBOL(switch_dev);
 
-#define MSM_PMEM_SF_SIZE	0x1A00000
+#ifdef CONFIG_MSM_MEMORY_HIGH               // 360 MB of free RAM
+#define MSM_PMEM_SF_SIZE          0x0F00000 //    15.728.640 Bytes =  15 MB
+#define MSM_PMEM_ADSP_SIZE        0x2A00000 //    44.040.192 Bytes =  42 MB
+
+/*Phenom Kernel BigMem - 374MB of free RAM */
+#elif defined(CONFIG_MSM_MEMORY_VERY_HIGH)
+#define MSM_PMEM_SF_SIZE          0x0F00000
+#define MSM_PMEM_ADSP_SIZE        0X1B00000 // No 720P Recording
+#else
+                                       
+/* Phenom Kernel default RAM Memory Configuration - 354 MB of free RAM */
+                                    
+#define MSM_PMEM_SF_SIZE          0x1200000 
+#define MSM_PMEM_ADSP_SIZE        0x2C00000 
+#endif
+
+#define MSM_FLUID_PMEM_ADSP_SIZE  0x2800000 //    41.943.040 Bytes =  40 MB
+#define PMEM_KERNEL_EBI0_SIZE     0x0600000 //     6.291.456 Bytes =   6 MB
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MSM_FB_PRIM_BUF_SIZE	(800 * 480 * 4 * 3) /* 4bpp * 3 Pages */
 #else
@@ -158,10 +176,6 @@ EXPORT_SYMBOL(switch_dev);
 #endif
 
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE, 4096)
-
-#define MSM_PMEM_ADSP_SIZE		0x2800000
-#define MSM_FLUID_PMEM_ADSP_SIZE	0x2800000
-#define PMEM_KERNEL_EBI0_SIZE		0x600000
 
 #ifdef CONFIG_ION_MSM
 static struct platform_device ion_dev;
@@ -3465,7 +3479,7 @@ static int oliver_tsp_ldo_on(void)
 		return rc;
 	}
 
-	rc = regulator_set_voltage(vreg_ldo10, 3000000,3000000);
+	rc = regulator_set_voltage(vreg_ldo10, 2850000,2850000);
 	if (rc) {
 		pr_err("%s: vreg LDO10 set level failed (%d)\n",
 		       __func__, rc);
@@ -4132,6 +4146,7 @@ static struct platform_device android_pmem_adsp_device = {
 	.id = 2,
 	.dev = { .platform_data = &android_pmem_adsp_pdata },
 };
+
 
 #if defined(CONFIG_CRYPTO_DEV_QCRYPTO) || \
 		defined(CONFIG_CRYPTO_DEV_QCRYPTO_MODULE) || \
@@ -5036,6 +5051,9 @@ static struct platform_device msm_bluesleep_device = {
     .resource = bluesleep_resources,
 };
 
+
+extern int bluesleep_start(void);
+extern void bluesleep_stop(void);
 static struct platform_device msm_bt_power_device = {
 .name = "bt_power",
 };
@@ -5093,13 +5111,17 @@ static int bluetooth_power(int on)
 
         gpio_direction_output(GPIO_BT_WAKE, GPIO_WLAN_LEVEL_HIGH);
         gpio_direction_output(GPIO_BT_WLAN_REG_ON, GPIO_WLAN_LEVEL_HIGH);
-        mdelay(150);
+//        mdelay(150);
+        usleep(150000);
         gpio_direction_output(GPIO_BT_RESET, GPIO_WLAN_LEVEL_HIGH);
 
         pr_info("bluetooth_power BT_WAKE:%d, HOST_WAKE:%d, REG_ON:%d\n", gpio_get_value(GPIO_BT_WAKE), gpio_get_value(GPIO_BT_HOST_WAKE), gpio_get_value(GPIO_BT_WLAN_REG_ON));   
-        mdelay(150);
+//        mdelay(100);
+
+        bluesleep_start();
     }
     else {
+        bluesleep_stop();
         gpio_direction_output(GPIO_BT_RESET, GPIO_WLAN_LEVEL_LOW);/* BT_VREG_CTL */
 
         if( gpio_get_value(WLAN_RESET) == GPIO_WLAN_LEVEL_LOW ) //SEC_BLUETOOTH : pjh_2010.06.30
@@ -5114,13 +5136,11 @@ static int bluetooth_power(int on)
     return 0;
 }
 
-extern void bluesleep_setup_uart_port(struct platform_device *uart_dev);
 static void __init bt_power_init(void)
 {
     pr_info("bt_power_init \n");
 
     msm_bt_power_device.dev.platform_data = &bluetooth_power;
-    bluesleep_setup_uart_port(&msm_device_uart_dm1);
 }
 
 static int bluetooth_gpio_init(void)
