@@ -19,6 +19,7 @@
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/cpufreq.h>
+#include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/sched.h>
 #include <linux/tick.h>
@@ -100,7 +101,7 @@ static void cpufreq_interactivex_timer(unsigned long data)
 	if (update_time == *cpu_idle_exit_time)
 		return;
 
-	delta_idle = cputime64_sub(now_idle, *cpu_time_in_idle);
+	delta_idle = now_idle - *cpu_time_in_idle;
 
 	/* Scale up if there were no idle cycles since coming out of idle */
 	if (delta_idle == 0) {
@@ -138,7 +139,7 @@ static void cpufreq_interactivex_timer(unsigned long data)
 	 * Do not scale down unless we have been at this frequency for the
 	 * minimum sample time.
 	 */
-	if (cputime64_sub(update_time, freq_change_time) < min_sample_time)
+	if ((update_time - freq_change_time) < min_sample_time)
 		return;
 
 	target_freq = policy->min;
@@ -184,8 +185,8 @@ static unsigned int cpufreq_interactivex_calc_freq(unsigned int cpu)
 
 	current_idle_time = get_cpu_idle_time_us(cpu, &current_wall_time);
 
-	idle_time = (unsigned int) current_idle_time - freq_change_time_in_idle;
-	delta_time = (unsigned int) current_wall_time - freq_change_time;
+	idle_time = (unsigned int) (current_idle_time - freq_change_time_in_idle);
+	delta_time = (unsigned int) (current_wall_time - freq_change_time);
 
 	cpu_load = 100 * (delta_time - idle_time) / delta_time;
 

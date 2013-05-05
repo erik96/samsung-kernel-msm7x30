@@ -22,6 +22,7 @@
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/cpufreq.h>
+#include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/sched.h>
 #include <linux/tick.h>
@@ -328,9 +329,8 @@ static void cpufreq_lulzactivew_timer(unsigned long data)
 		      (int) data, jiffies - pcpu->cpu_timer.expires);
 #endif
 
-	delta_idle = (unsigned int) cputime64_sub(now_idle, time_in_idle);
-	delta_time = (unsigned int) cputime64_sub(pcpu->timer_run_time,
-                                              idle_exit_time);
+	delta_idle = (unsigned int) (now_idle - time_in_idle);
+	delta_time = (unsigned int) (pcpu->timer_run_time - idle_exit_time);
 
 	/*
 	 * If timer ran less than 1ms after short-term sample started, retry.
@@ -346,10 +346,8 @@ static void cpufreq_lulzactivew_timer(unsigned long data)
 	else
 		cpu_load = 100 * (delta_time - delta_idle) / delta_time;
 
-	delta_idle = (unsigned int) cputime64_sub(now_idle,
-                                              pcpu->freq_change_time_in_idle);
-	delta_time = (unsigned int) cputime64_sub(pcpu->timer_run_time,
-                                              pcpu->freq_change_time);
+	delta_idle = (unsigned int) (now_idle - pcpu->freq_change_time_in_idle);
+	delta_time = (unsigned int) (pcpu->timer_run_time - pcpu->freq_change_time);
 
 	if (delta_idle > delta_time)
 		load_since_change = 0;
@@ -452,14 +450,14 @@ static void cpufreq_lulzactivew_timer(unsigned long data)
 	 * minimum sample time.
 	 */
 	if (new_freq < pcpu->target_freq) {
-		if (cputime64_sub(pcpu->timer_run_time, pcpu->freq_change_time) <
+		if ((pcpu->timer_run_time - pcpu->freq_change_time) <
 		    down_sample_time) {
 			dbgpr("timer %d: load=%d cur=%d tgt=%d not yet\n", (int) data, cpu_load, pcpu->target_freq, new_freq);
 			goto rearm;
 		}
 	}
 	else {
-		if (cputime64_sub(pcpu->timer_run_time, pcpu->freq_change_time) <
+		if ((pcpu->timer_run_time - pcpu->freq_change_time) <
 		    up_sample_time) {
 			dbgpr("timer %d: load=%d cur=%d tgt=%d not yet\n", (int) data, cpu_load, pcpu->target_freq, new_freq);
 			/* don't reset timer */
