@@ -17,10 +17,7 @@
 #include <linux/device.h>
 #include <linux/init.h>
 #include <linux/miscdevice.h>
-<<<<<<< HEAD
-=======
 #include <linux/module.h>
->>>>>>> d0f51d26a2bd4c07942ab2d1dc8fe0464ec63055
 #include <linux/phantom_kp_filter.h>
 #include <linux/slab.h>
 
