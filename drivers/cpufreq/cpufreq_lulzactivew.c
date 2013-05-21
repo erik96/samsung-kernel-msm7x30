@@ -32,7 +32,7 @@
 #include <asm/cputime.h>
 #include <linux/suspend.h>
 
-#define LULZACTIVEW_VERSION	(1)
+#define LULZACTIVEW_VERSION	(2)
 #define LULZACTIVEW_AUTHOR	"erik"
 
 // if you changed some codes for optimization, just write your name here.
@@ -75,7 +75,7 @@ static spinlock_t down_cpumask_lock;
 /*
  * The minimum amount of time to spend at a frequency before we can step up.
  */
-#define DEFAULT_UP_SAMPLE_TIME 35000
+#define DEFAULT_UP_SAMPLE_TIME 00010 // Scale directly to the max, reduce waiting time to 10ms
 static unsigned long up_sample_time;
 
 #define DEFAULT_UP_SAMPLE_TIME_SLEEP 50000
@@ -104,13 +104,16 @@ enum {
 #define DEFAULT_DEBUG_MODE (0)
 
 /*
- * CPU freq will be increased if measured load > inc_cpu_load;
- */
-#define DEFAULT_INC_CPU_LOAD 75
+ * CPU freq will be increased if measured load > inc_cpu_load; - 
+LulzactiveW - as max_up_step is present, the CPU must scale up to the max, so the loading measuring is decreased.*/
+ 
+#define DEFAULT_INC_CPU_LOAD 30
 static unsigned long inc_cpu_load;
 
 #define DEFAULT_INC_CPU_LOAD_SLEEP 95
-static unsigned long inc_cpu_load_awake;
+static unsigned long inc_cpu_load_awake; 
+
+
 
 /*
  * CPU freq will be decreased if measured load < dec_cpu_load;
