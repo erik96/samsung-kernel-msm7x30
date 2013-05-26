@@ -324,8 +324,8 @@ static void spi_init(void)
 }
 
 static struct regulator_bulk_data s6e63m0_regs[] = {
-	{ .supply = "ldo17", .min_uV = 1800000, .max_uV = 1800000},
-	{ .supply = "ldo15", .min_uV = 3000000, .max_uV = 3000000},
+	{ .supply = "ldo17", .min_uV = 1700000, .max_uV = 1700000},
+	{ .supply = "ldo15", .min_uV = 2800000, .max_uV = 2800000},
 };
 
 static int s6e63m0_regulators_init(void)
