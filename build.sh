@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BASE_PHENOM_VER="PhenomKernel_v3.9.4_CM10"
+BASE_PHENOM_VER="PhenomKernel_v3.9.5_CM10"
 
 # Build Environment
 export ARCH=arm
