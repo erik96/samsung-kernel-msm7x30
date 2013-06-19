@@ -616,7 +616,7 @@ static void lcdc_s6e63m0_set_brightness(int level)
 }
 
 #define DIM_BL 20
-#define MIN_BL 30
+#define MIN_BL 25
 #define MAX_BL 255
 #define MAX_GAMMA_VALUE 25
 
