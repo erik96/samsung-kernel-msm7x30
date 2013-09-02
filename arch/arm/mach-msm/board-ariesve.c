@@ -143,7 +143,23 @@ EXPORT_SYMBOL(sec_class);
 struct device *switch_dev;
 EXPORT_SYMBOL(switch_dev);
 
-#define MSM_PMEM_SF_SIZE	0x1A00000
+#ifdef CONFIG_MSM_MEMORY_HIGH               // 360 MB of free RAM
+#define MSM_PMEM_SF_SIZE          0x0F00000 //    15.728.640 Bytes =  15 MB
+#define MSM_PMEM_ADSP_SIZE        0x2A00000 //    44.040.192 Bytes =  42 MB
+#elif defined(CONFIG_MSM_MEMORY_MODE)       // 370 MB of free RAM
+#define MSM_PMEM_SF_SIZE          0x0800000 //     8.388.608 Bytes =   8 MB
+#define MSM_PMEM_ADSP_SIZE        0x2800000 //    41.943.040 Bytes =  40 MB
+#elif defined(CONFIG_MSM_MEMORY_VERY_HIGH)  // 400 MB of free RAM
+#define MSM_PMEM_SF_SIZE          0x800000 //     8.388.608 Bytes =   8 MB
+#define MSM_PMEM_ADSP_SIZE        0xA00000 //    NO VIDEO RECORDING
+#else                                       // 350 MB of free RAM
+#define MSM_PMEM_SF_SIZE          0x1A00000 //    27.262.976 Bytes =  26 MB
+#define MSM_PMEM_ADSP_SIZE        0x2900000 //    42.991.616 Bytes =  41 MB
+#endif
+
+#define MSM_FLUID_PMEM_ADSP_SIZE  0x2800000 //    41.943.040 Bytes =  40 MB
+#define PMEM_KERNEL_EBI0_SIZE     0x0600000 //     6.291.456 Bytes =   6 MB
+
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MSM_FB_PRIM_BUF_SIZE	(800 * 480 * 4 * 3) /* 4bpp * 3 Pages */
 #else
@@ -151,10 +167,6 @@ EXPORT_SYMBOL(switch_dev);
 #endif
 
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE, 4096)
-
-#define MSM_PMEM_ADSP_SIZE		0x2800000
-#define MSM_FLUID_PMEM_ADSP_SIZE	0x2800000
-#define PMEM_KERNEL_EBI0_SIZE		0x600000
 
 #define PMIC_GPIO_INT		27
 #define PMIC_VREG_WLAN_LEVEL	2900

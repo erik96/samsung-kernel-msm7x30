@@ -1644,6 +1644,33 @@ config MSM_CPU_FREQ_OVERCLOCKING
 
 endif # CPU_FREQ_MSM
 
+choice
+	prompt "Available Memory"
+	depends on ARCH_MSM7X30
+	default MSM_MEMORY_DEFAULT
+
+config MSM_MEMORY_DEFAULT
+	bool "Enable 350 MB of free RAM"
+	help
+	  Enabling this option allow to have 350 MB of free ram.
+
+config MSM_MEMORY_HIGH
+	bool "Enable 360 MB of free RAM"
+	help
+	  Enabling this option allow to have 360 MB of free ram.
+
+config MSM_MEMORY_MODE
+	bool "Enable 370 MB of free RAM"
+	help
+	  Enabling this option allow to have 370 MB of free ram.
+
+config MSM_MEMORY_VERY_HIGH
+	bool "Enable 400MB of free RAM -BigMem-"
+	help
+	  Enabling this option allow to have more memory (400MB) at the cost of video recording.
+
+endchoice
+
 config MSM_CPU_AVS
 	bool "Enable software controlled Adaptive Voltage Scaling (AVS)"
 	depends on (ARCH_MSM_SCORPION && QSD_SVS)
