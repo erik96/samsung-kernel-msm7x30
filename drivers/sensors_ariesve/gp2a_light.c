@@ -48,6 +48,9 @@
 /*******************************************************************************/
 
 
+#define LIGHT_DEVICE_NAME             "light_sensor"
+#define LIGHT_INPUT_NAME              "light_sensor"
+
 #define SENSOR_DEFAULT_DELAY            (200)   /* 200 ms */
 #define SENSOR_MAX_DELAY                (2000)  /* 2000 ms */
 #define ABS_STATUS                      (ABS_BRAKE)
@@ -57,7 +60,7 @@
 #define REALMODE_BUFFER		/* use realmode buffer */
 
 #ifdef REALMODE_BUFFER
-#define LIGHT_BUFFER_NUM	5
+#define LIGHT_BUFFER_NUM	14
 #else
 #define LIGHT_BUFFER_UP	5
 #define LIGHT_BUFFER_DOWN	5
@@ -761,7 +764,7 @@ lightsensor_probe(struct platform_device *pdev)
 #endif
 	input_set_abs_params(input_data, ABS_WAKE, 0, (1<<31), 0, 0);
 	input_set_abs_params(input_data, ABS_CONTROL_REPORT, 0, 1<<16, 0, 0);
-	input_data->name = "light_sensor";
+	input_data->name = LIGHT_INPUT_NAME;
 
 	rt = input_register_device(input_data);
 	if (rt) {
@@ -789,7 +792,7 @@ lightsensor_probe(struct platform_device *pdev)
 	lightsensor_rpc_init();
 #endif
 
-	data->lightsensor_class = class_create(THIS_MODULE, "lightsensor");
+	data->lightsensor_class = class_create(THIS_MODULE, LIGHT_DEVICE_NAME);
 	if (IS_ERR(data->lightsensor_class)) {
 		pr_err("%s: could not create lightsensor_class\n", __func__);
 		goto err;
@@ -895,7 +898,7 @@ static struct platform_driver lightsensor_driver = {
 	.resume     = lightsensor_resume,
 	.shutdown   = lightsensor_shutdown,
 	.driver = {
-		.name   = "light_sensor",
+		.name   = LIGHT_DEVICE_NAME,
 		.owner  = THIS_MODULE,
 	},
 };
@@ -903,7 +906,7 @@ static struct platform_driver lightsensor_driver = {
 
 static int __init lightsensor_init(void)
 {
-	sensor_pdev = platform_device_register_simple("light_sensor", 0, NULL, 0);
+	sensor_pdev = platform_device_register_simple(LIGHT_DEVICE_NAME, 0, NULL, 0);
 	if (IS_ERR(sensor_pdev)) {
 		return -1;
 	}

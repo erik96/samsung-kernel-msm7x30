@@ -33,7 +33,8 @@
 #include "yas_acc_driver-bma222.c"
 
 #define YAS_ACC_KERNEL_VERSION                                                        "3.0.401"
-#define YAS_ACC_KERNEL_NAME                                                   "YamahaBMA222"
+#define YAS_ACC_KERNEL_NAME                                                   "accelerometer"
+#define YAS_ACC_INPUT_NAME                                                    "accelerometer"
 /* [HSS] Additional Define */
 #define ACC_BMA150_I2C_SLAVE_ADDRESS                                          0x38
 #define ACC_BMA222_I2C_SLAVE_ADDRESS                                          0x08
@@ -268,7 +269,7 @@ static int yas_acc_core_driver_init(struct yas_acc_private_data *data)
         return err;
     }
 
-   err = driver->set_position(YAS_BMA222_DEFAULT_POSITION);    // hm83.cho Acc sensor install direction
+   err = driver->set_position(CONFIG_INPUT_BMA222_POSITION);    // hm83.cho Acc sensor install direction
 
     if (err != YAS_NO_ERROR) {
         kfree(driver);
@@ -417,20 +418,15 @@ static int yas_acc_input_init(struct yas_acc_private_data *data)
     if (!dev) {
         return -ENOMEM;
     }
-    dev->name = "accelerometer_sensor";
+    dev->name = YAS_ACC_INPUT_NAME;
     dev->id.bustype = BUS_I2C;
 
-    input_set_capability(dev, EV_REL, REL_RY);
-	input_set_capability(dev, EV_REL, REL_X);
-	input_set_capability(dev, EV_REL, REL_Y);
-	input_set_capability(dev, EV_REL, REL_Z);
-	/*
+    input_set_capability(dev, EV_ABS, ABS_MISC);
 	input_set_abs_params(dev, ABS_MISC, 0, (1<<31), 0, 0);
     input_set_abs_params(dev, ABS_X, ABSMIN_2G, ABSMAX_2G, 0, 0);
     input_set_abs_params(dev, ABS_Y, ABSMIN_2G, ABSMAX_2G, 0, 0);
     input_set_abs_params(dev, ABS_Z, ABSMIN_2G, ABSMAX_2G, 0, 0);
-	*/
-	input_set_drvdata(dev, data);
+    input_set_drvdata(dev, data);
 
     err = input_register_device(dev);
     if (err < 0) {
@@ -607,7 +603,7 @@ static ssize_t yas_acc_wake_store(struct device *dev,
     struct input_dev *input = to_input_dev(dev);
     static atomic_t serial = ATOMIC_INIT(0);
 
-    input_report_rel(input, REL_RY, atomic_inc_return(&serial));
+    input_report_abs(input, ABS_MISC, atomic_inc_return(&serial));
 
     return count;
 }
@@ -822,9 +818,9 @@ static void yas_acc_work_func(struct work_struct *work)
     accel.xyz.v[0] = accel.xyz.v[1] = accel.xyz.v[2] = 0;
     yas_acc_measure(data->driver, &accel);
 
-    input_report_rel(data->input, REL_X, accel.xyz.v[0]);
-    input_report_rel(data->input, REL_Y, accel.xyz.v[1]);
-    input_report_rel(data->input, REL_Z, accel.xyz.v[2]);
+    input_report_abs(data->input, ABS_X, accel.xyz.v[0]);
+    input_report_abs(data->input, ABS_Y, accel.xyz.v[1]);
+    input_report_abs(data->input, ABS_Z, accel.xyz.v[2]);
     input_sync(data->input);
 
     mutex_lock(&data->data_mutex);
