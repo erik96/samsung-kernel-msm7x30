@@ -29,12 +29,12 @@
 #include <linux/slab.h>
 #include "yas.h"
 
-#define SENSOR_NAME "orientation_sensor"
+#define SENSOR_NAME "orientation"
 #define SENSOR_DEFAULT_DELAY            (200)   /* 200 ms */
 #define SENSOR_MAX_DELAY                (2000)  /* 2000 ms */
-#define REL_STATUS                      (REL_RX)
-#define REL_WAKE                        (REL_RY)
-#define REL_CONTROL_REPORT              (REL_RZ)
+#define ABS_STATUS                      (ABS_BRAKE)
+#define ABS_WAKE                        (ABS_MISC)
+#define ABS_CONTROL_REPORT              (ABS_THROTTLE)
 
 struct sensor_data {
     struct mutex mutex;
@@ -90,7 +90,7 @@ sensor_delay_store(struct device *dev,
 
     data->delay = value;
 
-    input_report_rel(input_data, REL_CONTROL_REPORT, (data->enabled<<16) | value);
+    input_report_abs(input_data, ABS_CONTROL_REPORT, (data->enabled<<16) | value);
 	input_sync(input_data);
 
     mutex_unlock(&data->mutex);
@@ -131,7 +131,7 @@ sensor_enable_store(struct device *dev,
     mutex_lock(&data->mutex);
 
     data->enabled = value;
-    input_report_rel(input_data, REL_CONTROL_REPORT, (value<<16) | data->delay);
+    input_report_abs(input_data, ABS_CONTROL_REPORT, (value<<16) | data->delay);
 	input_sync(input_data);
     mutex_unlock(&data->mutex);
 
@@ -147,7 +147,7 @@ sensor_wake_store(struct device *dev,
     struct input_dev *input_data = to_input_dev(dev);
     static int cnt = 1;
 
-    input_report_rel(input_data, REL_WAKE, cnt++);
+    input_report_abs(input_data, ABS_WAKE, cnt++);
 	input_sync(input_data);
     return count;
 }
@@ -197,9 +197,10 @@ sensor_data_show(struct device *dev,
     int x, y, z;
 
     spin_lock_irqsave(&input_data->event_lock, flags);
-    x = input_abs_get_val(input_data,REL_X);
-    y = input_abs_get_val(input_data,REL_Y);
-    z = input_abs_get_val(input_data,REL_Z);
+
+    x = input_abs_get_val(input_data,ABS_X);
+    y = input_abs_get_val(input_data,ABS_Y);
+    z = input_abs_get_val(input_data,ABS_Z);
 
     spin_unlock_irqrestore(&input_data->event_lock, flags);
 
@@ -217,14 +218,14 @@ sensor_status_show(struct device *dev,
 
     spin_lock_irqsave(&input_data->event_lock, flags);
 
-	status = input_abs_get_val(input_data,REL_STATUS);
+	status = input_abs_get_val(input_data, ABS_STATUS);
 
     spin_unlock_irqrestore(&input_data->event_lock, flags);
 
     return sprintf(buf, "%d\n", status);
 }
 
-static DEVICE_ATTR(poll_delay, S_IRUGO|S_IWUSR|S_IWGRP,
+static DEVICE_ATTR(delay, S_IRUGO|S_IWUSR|S_IWGRP,
         sensor_delay_show, sensor_delay_store);
 static DEVICE_ATTR(enable, S_IRUGO|S_IWUSR|S_IWGRP,
         sensor_enable_show, sensor_enable_store);
@@ -239,7 +240,7 @@ static DEVICE_ATTR(debug_suspend, S_IRUGO|S_IWUSR,
 #endif /* DEBUG */
 
 static struct attribute *sensor_attributes[] = {
-    &dev_attr_poll_delay.attr,
+    &dev_attr_delay.attr,
     &dev_attr_enable.attr,
     &dev_attr_wake.attr,
     &dev_attr_data.attr,
@@ -263,7 +264,7 @@ sensor_suspend(struct platform_device *pdev, pm_message_t state)
     mutex_lock(&data->mutex);
 
     if (data->enabled) {
-        input_report_rel(this_data, REL_CONTROL_REPORT, (0<<16) | data->delay);
+        input_report_abs(this_data, ABS_CONTROL_REPORT, (0<<16) | data->delay);
 		input_sync(this_data);
     }
 
@@ -281,7 +282,7 @@ sensor_resume(struct platform_device *pdev)
     mutex_lock(&data->mutex);
 
     if (data->enabled) {
-        input_report_rel(this_data, REL_CONTROL_REPORT, (1<<16) | data->delay);
+        input_report_abs(this_data, ABS_CONTROL_REPORT, (1<<16) | data->delay);
 		input_sync(this_data);
     }
 
@@ -313,13 +314,13 @@ sensor_probe(struct platform_device *pdev)
         goto err;
     }
 
-    set_bit(EV_REL, input_data->evbit);
-    input_set_capability(input_data, EV_REL, REL_X);
-    input_set_capability(input_data, EV_REL, REL_Y);
-    input_set_capability(input_data, EV_REL, REL_Z);
-    input_set_capability(input_data, EV_REL, REL_STATUS); /* status */
-    input_set_capability(input_data, EV_REL, REL_WAKE); /* wake */
-    input_set_capability(input_data, EV_REL, REL_CONTROL_REPORT); /* enabled/delay */
+    set_bit(EV_ABS, input_data->evbit);
+    input_set_capability(input_data, EV_ABS, ABS_X);
+    input_set_capability(input_data, EV_ABS, ABS_Y);
+    input_set_capability(input_data, EV_ABS, ABS_Z);
+    input_set_capability(input_data, EV_ABS, ABS_STATUS); /* status */
+    input_set_capability(input_data, EV_ABS, ABS_WAKE); /* wake */
+    input_set_capability(input_data, EV_ABS, ABS_CONTROL_REPORT); /* enabled/delay */
 
     input_data->name = SENSOR_NAME;
 
@@ -330,13 +331,21 @@ sensor_probe(struct platform_device *pdev)
         goto err;
     }
     input_set_drvdata(input_data, data);
+/*
+	input_set_abs_params(input_data, ABS_X, 0, 1<<16, 0, 0);
+	input_set_abs_params(input_data, ABS_Y, 0, 1<<16, 0, 0);
+	input_set_abs_params(input_data, ABS_Z, 0, 1<<16, 0, 0);
+	input_set_abs_params(input_data, ABS_STATUS, 0, 1, 0, 0);
+	input_set_abs_params(input_data, ABS_WAKE, 0, 1<<31, 0, 0);
+	input_set_abs_params(input_data, ABS_CONTROL_REPORT, 0, 2<<16, 0, 0);
+*/
 
-	input_set_abs_params(input_data, REL_X, 0, 1<<16, 0, 0);
-	input_set_abs_params(input_data, REL_Y, 0, 1<<16, 0, 0);
-	input_set_abs_params(input_data, REL_Z, 0, 1<<16, 0, 0);
-	input_set_abs_params(input_data, REL_STATUS, 0, 1, 0, 0);
-	input_set_abs_params(input_data, REL_WAKE, 0, 1<<31, 0, 0);
-	input_set_abs_params(input_data, REL_CONTROL_REPORT, 0, 2<<16, 0, 0);
+	input_set_abs_params(input_data, ABS_X, INT_MIN, INT_MAX, 0, 0);
+	input_set_abs_params(input_data, ABS_Y, INT_MIN, INT_MAX, 0, 0);
+	input_set_abs_params(input_data, ABS_Z, INT_MIN, INT_MAX, 0, 0);
+	input_set_abs_params(input_data, ABS_STATUS, 0, 1, 0, 0);
+	input_set_abs_params(input_data, ABS_WAKE, INT_MIN, INT_MAX, 0, 0);
+	input_set_abs_params(input_data, ABS_CONTROL_REPORT, INT_MIN, INT_MAX, 0, 0);
 
     input_registered = 1;
 
