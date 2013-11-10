@@ -19,9 +19,9 @@ make "ariesve_erik_defconfig"
 # Build Kernel
 echo "\nBuilding Kernel\n"
 
-IMAGE_DIR=../output/cm10.1/zImage
-MODULE_DIR=../output/cm10.1/out/system/lib/modules/
-RAMDISK_DIR=../output/cm10.1/ramdisk/
+IMAGE_DIR=../output/cm10.2/zImage
+MODULE_DIR=../output/cm10.2/out/system/lib/modules/
+RAMDISK_DIR=../output/cm10.2/ramdisk/
 KERNEL_DIR=out
 
 make "-j5"
