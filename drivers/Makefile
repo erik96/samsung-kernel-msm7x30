@@ -6,11 +6,6 @@
 #
 
 # GPIO must come after pinctrl as gpios may need to mux pins etc
-
-ifdef CONFIG_CC_OPTIMIZE_MORE
-KBUILD_CFLAGS += -fno-inline-functions
-endif
-
 obj-y				+= pinctrl/
 obj-y				+= gpio/
 obj-$(CONFIG_PCI)		+= pci/
