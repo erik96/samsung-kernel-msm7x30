@@ -4,7 +4,7 @@ BASE_PHENOM_VER=$(head -n 1 phenom.version)
 
 # Build Environment
 export ARCH=arm
-export CROSS_COMPILE=/home/erik/android/kernel/toolchains/arm-cortex_a8-linux-gnueabi-linaro_4.8.2-2013.10/bin/arm-cortex_a8-linux-gnueabi-
+export CROSS_COMPILE=/home/erik/android/kernel/toolchains/arm-cortex_a8-linux-gnueabi-linaro_4.8.3-2013.11/bin/arm-cortex_a8-linux-gnueabi-
 
 make "clean"
 echo '\n'$BASE_PHENOM_VER 
